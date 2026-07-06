@@ -42,7 +42,7 @@ def import_file(filepath):
             "fiche_url": d.get("fiche_url"),
         })
 
-    url = f"{SUPABASE_URL}/rest/v1/prospects"
+    url = f"{SUPABASE_URL}/rest/v1/prospects?on_conflict=slug"
     headers = {
         "apikey": SUPABASE_KEY,
         "Authorization": f"Bearer {SUPABASE_KEY}",
@@ -79,3 +79,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
