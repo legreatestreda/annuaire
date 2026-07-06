@@ -1,0 +1,44 @@
+name: Scrape Annuaire E-commerce
+
+on:
+  workflow_dispatch:  # déclenchement manuel depuis l'onglet Actions du repo
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false  # si une catégorie plante, les autres continuent
+      matrix:
+        include:
+          - categorie: bijoux
+            total: 443
+          - categorie: maison-deco
+            total: 652
+          - categorie: mode
+            total: 1122
+          - categorie: sante-beaute
+            total: 680
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Installer les dépendances
+        run: pip install requests beautifulsoup4
+
+      - name: Lancer le scraping — ${{ matrix.categorie }}
+        run: python scrape_annuaire.py ${{ matrix.categorie }} ${{ matrix.total }}
+
+      - name: Commit et push du résultat
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add output/${{ matrix.categorie }}.json
+          git commit -m "Scraping ${{ matrix.categorie }} - $(date -u +%Y-%m-%dT%H:%M:%SZ)" || echo "Rien à commit"
+          git pull --rebase
+          git push
+          
