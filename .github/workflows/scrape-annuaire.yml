@@ -11,13 +11,13 @@ jobs:
       matrix:
         include:
           - categorie: bijoux
-            total: 24
+            total: 443
           - categorie: maison-deco
-            total: 24
+            total: 652
           - categorie: mode
-            total: 24
+            total: 1122
           - categorie: sante-beaute
-            total: 24
+            total: 680
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -33,12 +33,36 @@ jobs:
       - name: Lancer le scraping — ${{ matrix.categorie }}
         run: python scrape_annuaire.py ${{ matrix.categorie }} ${{ matrix.total }}
 
-      - name: Commit et push du résultat
+      - name: Upload artifact — ${{ matrix.categorie }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: output-${{ matrix.categorie }}
+          path: output/${{ matrix.categorie }}.json
+          retention-days: 7
+
+  commit-results:
+    needs: scrape  # attend que TOUS les jobs scrape soient terminés (même ceux en échec, grâce à if: always())
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Télécharger tous les artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: output
+          pattern: output-*
+          merge-multiple: true
+
+      - name: Vérifier les fichiers récupérés
+        run: ls -la output/
+
+      - name: Commit et push (un seul push, pas de conflit)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add output/${{ matrix.categorie }}.json
-          git commit -m "Scraping ${{ matrix.categorie }} - $(date -u +%Y-%m-%dT%H:%M:%SZ)" || echo "Rien à commit"
-          git pull --rebase
+          git add output/
+          git commit -m "Scraping annuaire - $(date -u +%Y-%m-%dT%H:%M:%SZ)" || echo "Rien à commit"
           git push
           
