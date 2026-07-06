@@ -1,0 +1,22 @@
+name: Import vers Supabase
+
+on:
+  workflow_dispatch:  # déclenchement manuel depuis l'onglet Actions du repo
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Installer les dépendances
+        run: pip install requests
+
+      - name: Importer les JSON vers Supabase
+        run: python import_to_supabase.py output/mode.json output/maison-deco.json output/sante-beaute.json output/bijoux.json
