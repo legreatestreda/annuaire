@@ -11,13 +11,13 @@ jobs:
       matrix:
         include:
           - categorie: bijoux
-            total: 443
+            total: 24
           - categorie: maison-deco
-            total: 652
+            total: 24
           - categorie: mode
-            total: 1122
+            total: 24
           - categorie: sante-beaute
-            total: 680
+            total: 24
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
